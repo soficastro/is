@@ -17,8 +17,8 @@ timestamp = np.arange(0, uEst.shape[0] * 0.1, 0.1)
 ### Normalizando dados
 uEst = uEst/np.max(np.abs(uEst))
 yEst = yEst/np.max(np.abs(yEst))
-uVal = yEst/np.max(np.abs(uVal))
-yVal = yEst/np.max(np.abs(yVal))
+uVal = uVal/np.max(np.abs(uVal))
+yVal = yVal/np.max(np.abs(yVal))
 
 '''
 plt.plot(timestamp, uEst, label="entrada treino normalizada")
@@ -74,11 +74,11 @@ plt.title("Treino")
 plt.legend()
 plt.show()
 '''
-
+'''
 mse_treino = mean_squared_error(yEst[:-grau], y_hat)
 print('erro treino')
 print(mse_treino)
-
+'''
 
 #############
 ##  Teste  ##
@@ -93,10 +93,11 @@ for i in range(n_theta):
     Psi_teste[:,i] = candidatos_teste[:,h[i]]
 y_hat_teste = Psi_teste @ theta
 
+'''
 mse_teste = mean_squared_error(yVal[:-grau], y_hat_teste)
 print('erro teste com minimos quadrados')
 print(mse_teste)
-
+'''
 '''
 plt.plot(timestamp[:-grau], yVal[:-grau], label="y")
 plt.plot(timestamp[:-grau], y_hat_teste, label="y_hat")
