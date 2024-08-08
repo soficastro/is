@@ -1,6 +1,8 @@
 import itertools
 import numpy as np
 
+####
+
 
 def melhor_ordem(candidatos, M, input, output, grau, n_theta):
 
