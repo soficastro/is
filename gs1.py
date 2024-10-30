@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
-from gramschmidt import *
+from frols import melhor_ordem, matriz_candidatos
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 
-data = pd.read_csv('ab2\exchanger.dat', delimiter='\t', header = None)
+data = pd.read_csv('data\exchanger.dat', delimiter='\t', header = None)
 
 time_steps = data[data.columns[0]].to_numpy()
 input_q = data[data.columns[1]].to_numpy()
