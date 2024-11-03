@@ -25,12 +25,8 @@ def frols(candidatos, M, output, grau):
     h = []
     Q = []
     g_final = []
-    rho = 0.00001
+    rho = 0.0001
     a = np.zeros((M, M))
-
-
-    
-
 
     for k in range(M):
         
@@ -110,7 +106,6 @@ def frols(candidatos, M, output, grau):
 
 
             esr = 1 - sum(ERR_total)
-            print(esr, sum(ERR_total))
             if esr < rho:
                 M_0 = k
                 break
