@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import scipy.io
+import matplotlib.pyplot as plt
 import os
 import re
 from frols import frols
@@ -13,7 +14,17 @@ data_folder = 'C:/Users/Sofia/Documents/Projeto/data'
 for filename in os.listdir(data_folder):
     system = os.path.join(data_folder, filename)
     if os.path.isfile(system):
-        if system == 'C:/Users/Sofia/Documents/Projeto/data\\exchanger.dat':
+        if system == 'C:/Users/Sofia/Documents/Projeto/data\\ballbeam.dat':
+            data = pd.read_csv(system, delimiter='\t', header = None)
+            system = 'Ball-beam'
+            u = data[data.columns[0]].to_numpy()
+            y = data[data.columns[1]].to_numpy()
+            ### Hiperparâmetros
+            nu = 3 #atraso da entrada
+            ny = 4 #atraso da saída
+            l = 3  #grau de nao linearidade
+        
+        elif system == 'C:/Users/Sofia/Documents/Projeto/data\\exchanger.dat':
             data = pd.read_csv(system, delimiter='\t', header = None)
             system = 'Heat Exchanger'
             time_steps = data[data.columns[0]].to_numpy()
@@ -21,18 +32,8 @@ for filename in os.listdir(data_folder):
             y = data[data.columns[2]].to_numpy()
             ### Hiperparâmetros
             nu = 2 #atraso da entrada
-            ny = 1 #atraso da saída
-            l = 3  #grau de nao linearidade
-
-        elif system == 'C:/Users/Sofia/Documents/Projeto/data\\ballbeam.dat':
-            data = pd.read_csv(system, delimiter='\t', header = None)
-            system = 'Ball-beam'
-            u = data[data.columns[0]].to_numpy()
-            y = data[data.columns[1]].to_numpy()
-            ### Hiperparâmetros
-            nu = 1 #atraso da entrada
-            ny = 1 #atraso da saída
-            l = 1  #grau de nao linearidade
+            ny = 4 #atraso da saída
+            l = 2  #grau de nao linearidade
 
         elif system == 'C:/Users/Sofia/Documents/Projeto/data\\robot_arm.dat':
             data = pd.read_csv(system, delimiter='\t', header = None)
@@ -40,9 +41,9 @@ for filename in os.listdir(data_folder):
             u = data[data.columns[0]].to_numpy()
             y = data[data.columns[1]].to_numpy()
             ### Hiperparâmetros
-            nu = 2 #atraso da entrada
-            ny = 1 #atraso da saída
-            l = 3  #grau de nao linearidade
+            nu = 4 #atraso da entrada
+            ny = 3 #atraso da saída
+            l = 2  #grau de nao linearidade
 
         elif system == 'C:/Users/Sofia/Documents/Projeto/data\\SNLS80mV.mat':
             data = scipy.io.loadmat(system)
@@ -50,9 +51,9 @@ for filename in os.listdir(data_folder):
             u = np.reshape(data['V1'],131072)
             y = np.reshape(data['V2'],131072)
             ### Hiperparâmetros
-            nu = 2 #atraso da entrada
-            ny = 1 #atraso da saída
-            l = 2  #grau de nao linearidade
+            nu = 3 #atraso da entrada
+            ny = 3 #atraso da saída
+            l = 3  #grau de nao linearidade
 
         elif system == 'C:/Users/Sofia/Documents/Projeto/data\\dataBenchmark.mat':
             data = scipy.io.loadmat(system)
@@ -61,11 +62,10 @@ for filename in os.listdir(data_folder):
             y_train = np.reshape(data['yEst'],1024)
             u_test = np.reshape(data['uVal'],1024)
             y_test = np.reshape(data['yVal'],1024)
-            
             ### Hiperparâmetros
-            nu = 2 #atraso da entrada
-            ny = 1 #atraso da saída
-            l = 2  #grau de nao linearidade
+            nu = 4 #atraso da entrada
+            ny = 2 #atraso da saída
+            l = 2  #grau de não linearidade
 
 
         print("System:", system)
@@ -77,7 +77,7 @@ for filename in os.listdir(data_folder):
             u_train, u_test = u[:n_train], u[n_train:]
             y_train, y_test = y[:n_train], y[n_train:]
 
-        ### Normalizando dados de treino e teste
+        ## Normalizando dados de treino e teste
         u_train = u_train/np.max(np.abs(u_train))
         y_train = y_train/np.max(np.abs(y_train))
         u_test = u_test/np.max(np.abs(u_test))
@@ -88,14 +88,13 @@ for filename in os.listdir(data_folder):
         ################
         #### Treino ####
 
-
-        print(f"nu: {nu}, ny: {ny}, l: {l}")
-
         candidatos, M, regressor_names = matriz_candidatos(input = u_train, output = y_train, nu = nu, ny = ny, l = l)
         n = len(u_train)
         grau = max(nu, ny)
         h, ERR_total, theta = frols(candidatos = candidatos, M = M, output = y_train, grau = grau)
         n_theta = len(theta)
+
+
 
         chosen_regressors = []
         for i in range(n_theta):
@@ -105,14 +104,17 @@ for filename in os.listdir(data_folder):
         terms = [f"{theta[i]} * {chosen_regressors[i]}" for i in range(n_theta)]
         model = "y(k) = " + " + ".join(terms)
 
-        #print(model)
-
-
         ### Criando matriz de regressores final de tamanho n_theta
-        #Psi = np.zeros((n-grau,n_theta))
+        #Psi = np.zeros((n-grau, n_theta))
         #for i in range(n_theta):
-        #    Psi[:,i] = candidatos[:,h[i]]
-        #y_hat = Psi @ theta
+        #    Psi[:,i] = candidatos[:, h[i]]
+        #theta = np.linalg.inv(Psi.T @ Psi) @ Psi.T @ y_train[:-grau]
+
+        print(model)
+
+
+
+        
 
 
         #############
@@ -123,7 +125,8 @@ for filename in os.listdir(data_folder):
         y_hat_test_onestep = np.zeros(n_test)
         y_hat_test_free[:grau] = y_test[:grau]
 
-
+        
+        
         for k in range(grau, n_test):
             regressor_values_free = []
             regressor_values_onestep = []
@@ -146,17 +149,23 @@ for filename in os.listdir(data_folder):
             y_hat_test_free[k] = sum(theta * reg for theta, reg in zip(theta, regressor_values_free))
             y_hat_test_onestep[k] = sum(theta * reg for theta, reg in zip(theta, regressor_values_onestep))
 
-
+        
         #Erro Quadrático Médio
         mse_free = np.mean((y_hat_test_free - y_test)**2)
-        variance_free = np.var(y_test)
-        nmse_free = mse_free / variance_free
-        print("Normalized Mean Squared Error Free Simulation:", nmse_free)
+        print("Mean Squared Error Free Simulation:", mse_free)
         mse_onestep = np.mean((y_hat_test_onestep - y_test)**2)
-        variance_onestep = np.var(y_test)
-        nmse_onestep = mse_onestep / variance_onestep
-        print("Normalized Mean Squared Error One Step Prediction:", nmse_onestep)
+        print("Mean Squared Error One Step Prediction:", mse_onestep)
 
+        plt.figure(figsize=(10, 6))
+        plt.plot(y_test, label="Saída esperada", color="b")
+        plt.plot(y_hat_test_onestep, label="Saída estimada", color="r", linestyle="--")
+        plt.xlabel("Amostras")
+        plt.ylabel("Amplitude")
+        plt.title(f"{system} - Passo")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+        
             
            
 

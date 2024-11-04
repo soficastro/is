@@ -47,7 +47,7 @@ def melhor_ordem(candidatos, M, input, output, grau, n_theta):
                 q_s[:,i]=candidatos[:, i]
 
                 #Estime por mínimos quadrados o respectivo coeficiente
-                g_s_hat[i] = q_s[:,i].dot(output[: -grau])/q_s[:,i].dot(q_s[:,i])
+                g_s_hat[i] = q_s[:, i].dot(output[:-grau]) / q_s[:, i].dot(q_s[:, i])
 
                 #Determine o ERR de cada possível regressor, candidato ao 1º regressor ortogonal
                 ERR.append(g_s_hat[i]**2*q_s[:,i].dot(q_s[:,i])/output[:-grau].dot(output[: -grau]))
@@ -55,7 +55,7 @@ def melhor_ordem(candidatos, M, input, output, grau, n_theta):
             #Escolha para ser o 1º regressor ortogonal, aquele com maior ERR
             h.append(np.argmax(ERR))
             #Este é o 1º regressor ortogonal, que é a primeira coluna de Q
-            Q.append(candidatos[:,h[0]])
+            Q.append(candidatos[:, h[0]])
 
             ERR_total[k] = ERR[h[0]]
 
@@ -66,6 +66,7 @@ def melhor_ordem(candidatos, M, input, output, grau, n_theta):
             ## Para i = 1, ..., M, i =/= h_1, ..., i =/= h_k-1
             ## Ou seja, até completar o número de termos desejado no modelo, para todos os regressores que ainda não foram escolhidos
             for i in range(M):
+                
                 if i not in h:       
                     alpha = np.zeros(k)
                     q_k = np.zeros(k)
@@ -93,7 +94,7 @@ def melhor_ordem(candidatos, M, input, output, grau, n_theta):
 
             somatorio2 = 0
             for j in range(k):
-                somatorio2 = somatorio2 + Q[j].dot(candidatos[:,k])/Q[j].dot(Q[j]) #Isso é alpha
+                somatorio2 = somatorio2 + Q[j].dot(candidatos[:, k]) / Q[j].dot(Q[j]) #Isso é alpha
 
 
             #Escolha para ser o k-ésimo regressor ortogonal aquele regressor, entre os restantes, com maior ERR
@@ -101,7 +102,7 @@ def melhor_ordem(candidatos, M, input, output, grau, n_theta):
    
 
             #Esse é o k-ésimo regressor ortogonal regressor ortogonal, que é a k-ésima coluna de Q
-            Q.append(candidatos[:,h[k]] - somatorio2)
+            Q.append(candidatos[:, h[k]] - somatorio2)
 
             ERR_total[k] = ERR[h[k]]
 

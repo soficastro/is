@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import scipy.io
 from sklearn.metrics import mean_squared_error
 
-data = scipy.io.loadmat('ab2\dataBenchmark.mat')
+data = scipy.io.loadmat('C:/Users/Sofia/Documents/Projeto/data/dataBenchmark.mat')
 
 uEst = np.reshape(data['uEst'],1024)
 yEst = np.reshape(data['yEst'],1024)
@@ -93,15 +93,15 @@ for i in range(n_theta):
     Psi_teste[:,i] = candidatos_teste[:,h[i]]
 y_hat_teste = Psi_teste @ theta
 
-'''
+
 mse_teste = mean_squared_error(yVal[:-grau], y_hat_teste)
-print('erro teste com minimos quadrados')
+print('erro teste ')
 print(mse_teste)
-'''
-'''
+
+
 plt.plot(timestamp[:-grau], yVal[:-grau], label="y")
 plt.plot(timestamp[:-grau], y_hat_teste, label="y_hat")
 plt.title("Teste")
 plt.legend()
 plt.show()
-'''
+

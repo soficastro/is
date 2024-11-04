@@ -4,7 +4,7 @@ from gramschmidt import *
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 
-data = pd.read_csv('ab2/ballbeam.dat', delimiter='\t', header = None)
+data = pd.read_csv('C:/Users/Sofia/Documents/Projeto/data/ballbeam.dat', delimiter='\t', header = None)
 
 u = data[data.columns[0]].to_numpy()
 y = data[data.columns[1]].to_numpy()
@@ -23,8 +23,8 @@ plt.legend()
 plt.show()
 '''
 
-### Treino em 20% dos dados
-n_train = int(0.2 * u.shape[0])
+### Treino em 75% dos dados
+n_train = int(0.75 * u.shape[0])
 
 t_train, t_test = timestamp[-n_train:], timestamp[:-n_train]
 u_train, u_test = u[-n_train:], u[:-n_train]
@@ -75,9 +75,9 @@ plt.show()
 print(theta)
 '''
 
-mse_treino = mean_squared_error(y_train[:-grau], y_hat)
-print('erro treino')
-print(mse_treino)
+#mse_treino = mean_squared_error(y_train[:-grau], y_hat)
+#print('erro treino')
+#print(mse_treino)
 
 
 #############
@@ -95,13 +95,12 @@ for i in range(n_theta):
 y_hat_teste = Psi_teste @ theta
 
 mse_teste = mean_squared_error(y_test[:-grau], y_hat_teste)
-print('erro teste com minimos quadrados')
+print('erro medio quadratico')
 print(mse_teste)
 
-'''
+
 plt.plot(t_test[:-grau], y_test[:-grau], label="y")
 plt.plot(t_test[:-grau], y_hat_teste, label="y_hat")
 plt.title("Teste")
 plt.legend()
 plt.show()
-'''
