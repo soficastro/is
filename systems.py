@@ -76,10 +76,10 @@ for filename in os.listdir(data_folder):
 
 
         ## Normalizando dados de treino e teste
-        '''u_train = u_train/np.max(np.abs(u_train))
+        u_train = u_train/np.max(np.abs(u_train))
         y_train = y_train/np.max(np.abs(y_train))
         u_test = u_test/np.max(np.abs(u_test))
-        y_test = y_test/np.max(np.abs(y_test))'''    
+        y_test = y_test/np.max(np.abs(y_test))  
 
 
         ################
@@ -101,8 +101,16 @@ for filename in os.listdir(data_folder):
         print(model)
 
 
-        
+        #############
+        ##  Teste  ##
 
+        n_test = len(u_test)
+        y_hat_test_free = np.zeros(n_test, dtype='float64')
+        y_hat_test_onestep = np.zeros(n_test, dtype='float64')
+        y_hat_test_free[:grau] = y_test[:grau]
+        y_hat_test_onestep[:grau] = y_test[:grau]
+
+        
 
 
         

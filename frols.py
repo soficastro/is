@@ -71,9 +71,9 @@ def frols(candidatos, M, output, grau):
                     for j in range(m):
 
                         #Estime por mínimos quadrados os coeficientes dos regressores ortogonais escolhidos até a presente iteração m
-                        alpha[j] = Q[j].dot(candidatos[:, i]) / Q[j].dot(Q[j])
+                        alpha[j] = Q[:,j].dot(candidatos[:, i]) / Q[:,j].dot(Q[:,j])
 
-                        somatorio = somatorio + alpha[j] * Q[j]
+                        somatorio = somatorio + alpha[j] * Q[:,j]
 
                     #Determine o próximo regressor ortogonal (candidato) eliminando de um regressor original o efeito dos m-1 regressores
                     #ortogonais escolhidos até o presente
@@ -104,7 +104,7 @@ def frols(candidatos, M, output, grau):
 
             #Construa a matriz A
             for r in range(m):
-                a[r,m] = np.dot(Q[j], candidatos[:, l[m]]) / np.dot(Q[j], Q[j])
+                a[r,m] = np.dot(Q[:,r], candidatos[:, l[m]]) / np.dot(Q[:,r], Q[:,r])
             a[m,m] = 1
                 
 
