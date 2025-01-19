@@ -13,10 +13,10 @@ def matriz_candidatos(input, output, nu, ny, l):
         linear_psi[:, ny + nu - 1 - i] = input[i:n - grau + i]
 
 
-
     # Gerar combinações de termos até grau l
     array = np.arange(nu + ny)
     combinations = find_combinations(array, l)
+
     M = len(combinations)
 
     # Criar matriz de candidatos Psi
@@ -59,7 +59,7 @@ def generate_regressor_names(nu, ny, combinations):
             plt.show()
             '''
 
-def prediction(u_test, y_test, grau, theta, chosen_regressors, n_test, y_hat_test_free, y_hat_test_onestep):
+'''def prediction(u_test, y_test, grau, theta, chosen_regressors, n_test, y_hat_test_free, y_hat_test_onestep):
     for k in range(grau, n_test):
         regressor_values_free = []
         regressor_values_onestep = []
@@ -82,3 +82,4 @@ def prediction(u_test, y_test, grau, theta, chosen_regressors, n_test, y_hat_tes
             
         y_hat_test_free[k] = sum(theta * reg for theta, reg in zip(theta, regressor_values_free))
         y_hat_test_onestep[k] = sum(theta * reg for theta, reg in zip(theta, regressor_values_onestep))
+        '''
