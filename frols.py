@@ -20,7 +20,6 @@ def frols(candidatos, M, output, grau):
 
     l = []                        # Lista de índices (colunas de P) que foram selecionados
     ERR_total = np.zeros(M)       # Taxa de Redução de Erro de cada passo
-    Q = []                        # Matriz de regressores ortogonais
     g_final = []                  # Parâmetros dos regressores ortogonais
     a = np.zeros((M, M))          
               
@@ -47,7 +46,7 @@ def frols(candidatos, M, output, grau):
             #Escolha para ser o 1º regressor ortogonal, aquele com maior ERR
             l.append(np.argmax(ERR_s))
             #Este é o 1º regressor ortogonal, que é a primeira coluna de Q
-            Q.append(candidatos[:, l[0]])
+            Q = candidatos[:, l[0]].reshape(-1, 1)
             #Guarde o g do 1º regressor
             g_final.append(g_s[l[0]])
             #Guarde o ERR do 1º regressor
@@ -94,7 +93,8 @@ def frols(candidatos, M, output, grau):
             l.append(np.argmax(ERR_k))
 
             #Esse é o m-ésimo regressor ortogonal regressor ortogonal, que é a m-ésima coluna de Q
-            Q.append(q_k[l[m]])
+            # Q.append(q_k[l[m]])
+            Q = np.column_stack((Q, q_k[l[m]]))
             
             #Guarde o g do m-ésimo regressor
             g_final.append(g_k[l[m]])

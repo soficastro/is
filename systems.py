@@ -8,12 +8,12 @@ from utils import matriz_candidatos
 
 print('--')
 
-data_folder = 'C:/Users/Sofia/Documents/Projeto/data'
+data_folder = 'data'
 
 for filename in os.listdir(data_folder):
     system = os.path.join(data_folder, filename)
     if os.path.isfile(system):
-        if system == 'C:/Users/Sofia/Documents/Projeto/data\\ballbeam.dat':
+        if "ballbeam" in system:
             data = pd.read_csv(system, delimiter='\t', header = None)
             system = 'Ball-beam'
             u = data[data.columns[0]].to_numpy()
@@ -23,7 +23,7 @@ for filename in os.listdir(data_folder):
             ny = 3 #atraso da saída
             l = 3  #grau de nao linearidade
 
-        elif system == 'C:/Users/Sofia/Documents/Projeto/data\\dataBenchmark.mat':
+        elif "dataBenchmark" in system:
             data = scipy.io.loadmat(system)
             system = 'Tanks'
             u_train = np.reshape(data['uEst'],1024)
@@ -35,7 +35,7 @@ for filename in os.listdir(data_folder):
             ny = 2 #atraso da saída
             l = 3  #grau de não linearidade
         
-        elif system == 'C:/Users/Sofia/Documents/Projeto/data\\exchanger.dat':
+        elif "exchanger" in system:
             data = pd.read_csv(system, delimiter='\t', header = None)
             system = 'Heat Exchanger'
             time_steps = data[data.columns[0]].to_numpy()
@@ -46,7 +46,7 @@ for filename in os.listdir(data_folder):
             ny = 4 #atraso da saída
             l = 2  #grau de nao linearidade
 
-        elif system == 'C:/Users/Sofia/Documents/Projeto/data\\robot_arm.dat':
+        elif "robot_arm" in system:
             data = pd.read_csv(system, delimiter='\t', header = None)
             system = 'Robot Arm'
             u = data[data.columns[0]].to_numpy()
@@ -56,7 +56,8 @@ for filename in os.listdir(data_folder):
             ny = 3 #atraso da saída
             l = 2  #grau de nao linearidade
 
-        elif system == 'C:/Users/Sofia/Documents/Projeto/data\\SNLS80mV.mat':
+        elif "SNLS80mV" in system:
+            continue
             data = scipy.io.loadmat(system)
             system = 'Silverbox'
             u = np.reshape(data['V1'],131072)
@@ -89,6 +90,7 @@ for filename in os.listdir(data_folder):
         n = len(u_train)
         grau = max(nu, ny)
         h, ERR_total, theta = frols(candidatos = candidatos, M = M, output = y_train, grau = grau)
+
         n_theta = len(theta)
 
         chosen_regressors = []
@@ -96,10 +98,27 @@ for filename in os.listdir(data_folder):
             chosen_regressors.append(regressor_names[h[i]])
 
 
-        terms = [f"{theta[i]} * {chosen_regressors[i]}" for i in range(n_theta)]
-        model = "y(k) = " + " + ".join(terms)
-        print(model)
+        # terms = [f"{theta[i]} * {chosen_regressors[i]}" for i in range(n_theta)]
+        # model = "y(k) = " + " + ".join(terms)
+        # print(model)
+        candidatos, M, regressor_names = matriz_candidatos(input = u_test, output = y_test, nu = nu, ny = ny, l = l)
 
+        n_teste = len(u_test)
+
+        Psi_teste = np.zeros((n_teste - grau, n_theta))
+        for i in range(n_theta):
+            Psi_teste[:,i] = candidatos[:,h[i]]
+        y_hat_test = Psi_teste @ theta
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(y_test[:-grau], label="Saída esperada", color="b")
+        plt.plot(y_hat_test, label="Saída estimada", color="r", linestyle="--")
+        plt.xlabel("Time")
+        plt.ylabel("Amplitude")
+        plt.title(f"{system}")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 
         #############
         ##  Teste  ##
