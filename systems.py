@@ -98,9 +98,13 @@ for filename in os.listdir(data_folder):
             chosen_regressors.append(regressor_names[h[i]])
 
 
+        ### OUTPUT MODEL ###
+        
         # terms = [f"{theta[i]} * {chosen_regressors[i]}" for i in range(n_theta)]
         # model = "y(k) = " + " + ".join(terms)
         # print(model)
+
+        ### ONE STEP FORWARD SIMULATION ###
         candidatos, M, regressor_names = matriz_candidatos(input = u_test, output = y_test, nu = nu, ny = ny, l = l)
 
         n_teste = len(u_test)
@@ -111,7 +115,7 @@ for filename in os.listdir(data_folder):
         y_hat_test = Psi_teste @ theta
 
         plt.figure(figsize=(10, 6))
-        plt.plot(y_test[:-grau], label="Saída esperada", color="b")
+        plt.plot(y_test[grau:], label="Saída esperada", color="b")
         plt.plot(y_hat_test, label="Saída estimada", color="r", linestyle="--")
         plt.xlabel("Time")
         plt.ylabel("Amplitude")
@@ -119,15 +123,8 @@ for filename in os.listdir(data_folder):
         plt.legend()
         plt.grid(True)
         plt.show()
+        
 
-        #############
-        ##  Teste  ##
-
-        n_test = len(u_test)
-        y_hat_test_free = np.zeros(n_test, dtype='float64')
-        y_hat_test_onestep = np.zeros(n_test, dtype='float64')
-        y_hat_test_free[:grau] = y_test[:grau]
-        y_hat_test_onestep[:grau] = y_test[:grau]
 
         
 
