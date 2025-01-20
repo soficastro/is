@@ -21,9 +21,10 @@ for filename in os.listdir(data_folder):
             ### Hiperparâmetros
             nu = 3 #atraso da entrada
             ny = 3 #atraso da saída
-            l = 3  #grau de nao linearidade
+            l = 3 #grau de nao linearidade
 
         elif "dataBenchmark" in system:
+            continue
             data = scipy.io.loadmat(system)
             system = 'Tanks'
             u_train = np.reshape(data['uEst'],1024)
@@ -36,17 +37,19 @@ for filename in os.listdir(data_folder):
             l = 3  #grau de não linearidade
         
         elif "exchanger" in system:
+            continue
             data = pd.read_csv(system, delimiter='\t', header = None)
             system = 'Heat Exchanger'
             time_steps = data[data.columns[0]].to_numpy()
             u = data[data.columns[1]].to_numpy()
             y = data[data.columns[2]].to_numpy()
             ### Hiperparâmetros
-            nu = 2 #atraso da entrada
+            nu = 4 #atraso da entrada
             ny = 4 #atraso da saída
             l = 2  #grau de nao linearidade
 
         elif "robot_arm" in system:
+            continue
             data = pd.read_csv(system, delimiter='\t', header = None)
             system = 'Robot Arm'
             u = data[data.columns[0]].to_numpy()
@@ -104,7 +107,8 @@ for filename in os.listdir(data_folder):
         # model = "y(k) = " + " + ".join(terms)
         # print(model)
 
-        ### ONE STEP FORWARD SIMULATION ###
+        # ## ONE STEP FORWARD SIMULATION ###
+
         candidatos, M, regressor_names = matriz_candidatos(input = u_test, output = y_test, nu = nu, ny = ny, l = l)
 
         n_teste = len(u_test)
@@ -113,26 +117,44 @@ for filename in os.listdir(data_folder):
         for i in range(n_theta):
             Psi_teste[:,i] = candidatos[:,h[i]]
         y_hat_test = Psi_teste @ theta
+        
+        ### FREE SIMULATION ###
+        n = len(u_test)
+        grau = max(nu, ny)
+
+        candidatos, M, regressor_names = matriz_candidatos(input = u_test, output = y_test, nu = nu, ny = ny, l = l)
+
+        y_hat = np.zeros(n)
+
+        y_hat[:grau] = y_test[:grau]
+
+        Psi_full = candidatos[0]
+
+        Psi_frols = np.zeros(n_theta)
+
+        for i in range(n_theta):
+            Psi_frols[i] = Psi_full[h[i]]
+                
+        y_hat[grau] = Psi_frols.dot(theta)
+
+        for k in range(grau + 1, n):
+            
+            candidatos, M, regressor_names = matriz_candidatos(input = u_test[:k+1], output = y_hat[:k+1], nu = nu, ny = ny, l = l)
+
+            Psi_full = candidatos[-1]
+
+            for i in range(n_theta):
+                Psi_frols[i] = Psi_full[h[i]]
+
+            y_hat[k] = Psi_frols.dot(theta)
 
         plt.figure(figsize=(10, 6))
         plt.plot(y_test[grau:], label="Saída esperada", color="b")
-        plt.plot(y_hat_test, label="Saída estimada", color="r", linestyle="--")
+        plt.plot(y_hat[grau:], label="Saída estimada", color="r")
+        plt.plot(y_hat_test, label="Saída passo à frente", color="g", linestyle="--")
         plt.xlabel("Time")
         plt.ylabel("Amplitude")
         plt.title(f"{system}")
         plt.legend()
         plt.grid(True)
         plt.show()
-        
-
-
-        
-
-
-        
-
-        
-
-
-
-
