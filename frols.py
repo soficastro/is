@@ -1,123 +1,125 @@
 import numpy as np
 import scipy
 
-def frols(candidatos, M, output, grau):
+def frols(candidatos, y, max_delay, rho):
     """  
     Entrada:
         candidatos - matriz (D) com regressores candidatos (p)
-        M - número de regressores candidatos
-        output - vetor y(t) de saída do sistema
-        grau - max(nu, ny)
+        y - vetor y(t) de saída do sistema
+        max_delay - max(nu, ny)
         
     Saída:
-        h - índice que indica a ordem encontrada dos regressores
-        ERR_total - ERR de cada regressor escolhido
+        l - índice que indica a ordem encontrada dos regressores
         theta - vetor com thetas escolhidos
+        rho - limiar
     """
-    N = len(output)               # Tamanho do vetor y(t)
-    M_0 = M                       # Número de regressores selecionados
-    rho = 0.0001                  
 
-    l = []                        # Lista de índices (colunas de P) que foram selecionados
-    ERR_total = np.zeros(M)       # Taxa de Redução de Erro de cada passo
-    g_final = []                  # Parâmetros dos regressores ortogonais
-    a = np.zeros((M, M))          
+    N = len(y)                    # Tamanho do vetor y(t)
+    M = candidatos.shape[1]       # Número de regressores candidatos
+    M_0 = M                       # Inicializando número de regressores selecionados          
+
+    l = []                        # Índices (colunas de P) que foram selecionados
+    ERR_total = np.zeros(M)       # Taxa de Redução de Erro dos regressores
+    g = []                        # Parâmetros dos regressores ortogonais
+    A = np.zeros((M, M))          # Inicializando matriz auxiliar A
+
+    sigma = y[max_delay:].dot(y[max_delay:])
               
-    for m in range(M):
+    for s in range(M):
 
-        ## A primeira iteração difere das iterações seguintes (s)
-        if m == 0:
+        ## A primeira iteração difere das iterações seguintes (1)
+        if s == 0:
 
-            g_s = np.zeros(M)             
-            q_s = np.zeros((N - grau, M)) 
-            ERR_s = []
+            g_1 = np.zeros(M)             
+            q_1 = np.zeros((N - max_delay, M)) 
+            ERR_1 = []
 
-            for i in range(M):
+            for m in range(M):
 
-                #Tome o i-ésimo regressor original para compor o 1º regressor ortogonal
-                q_s[:, i] = candidatos[:, i]
+                #Tome o m-ésimo regressor original para compor o 1º regressor ortogonal
+                q_1[:, m] = candidatos[:, m]
 
                 #Estime por mínimos quadrados o respectivo coeficiente
-                g_s[i] = q_s[:, i].dot(output[grau:]) / q_s[:, i].dot(q_s[:, i])
+                g_1[m] = q_1[:, m].dot(y[max_delay:]) / q_1[:, m].dot(q_1[:, m])
 
                 #Determine o ERR de cada possível regressor, candidato ao 1º regressor ortogonal
-                ERR_s.append(g_s[i] ** 2 * q_s[:, i].dot(q_s[:, i]) / output[grau:].dot(output[grau:]))
+                ERR_1.append(g_1[m] ** 2 * q_1[:, m].dot(q_1[:, m]) / sigma)
 
             #Escolha para ser o 1º regressor ortogonal, aquele com maior ERR
-            l.append(np.argmax(ERR_s))
+            l.append(np.argmax(ERR_1))
             #Este é o 1º regressor ortogonal, que é a primeira coluna de Q
             Q = candidatos[:, l[0]].reshape(-1, 1)
             #Guarde o g do 1º regressor
-            g_final.append(g_s[l[0]])
+            g.append(g_1[l[0]])
             #Guarde o ERR do 1º regressor
-            ERR_total[0] = ERR_s[l[0]]
+            ERR_total[0] = ERR_1[l[0]]
             #Construa a matriz A
-            a[0,0] = 1
+            A[0,0] = 1
 
-        ## Para m = 2, ..., M0 (k)
+        ## Para s = 2, ..., M0 (s)
         else:
-            ERR_k = []
-            g_k = []
-            q_k = []
-            ## Para i = 1, ..., M, i =/= l_1, ..., i =/= l_m-1
+            ERR_s = []
+            g_s = []
+            q_s = []
+            ## Para m = 1, ..., M, m =/= l_1, ..., m =/= l_m-1
             ## Ou seja, até chegar no critério de parada, para todos os regressores que ainda não foram escolhidos
-            for i in range(M):
+            for m in range(M):
 
-                if i not in l:
-                    alpha = np.zeros(m)
+                if m not in l:
+                    alpha = np.zeros(s)
                     
                     somatorio = 0
-                    for j in range(m):
+                    for r in range(s):
 
                         #Estime por mínimos quadrados os coeficientes dos regressores ortogonais escolhidos até a presente iteração m
-                        alpha[j] = Q[:,j].dot(candidatos[:, i]) / Q[:,j].dot(Q[:,j])
+                        alpha[r] = Q[:,r].dot(candidatos[:, m]) / Q[:,r].dot(Q[:,r])
 
-                        somatorio = somatorio + alpha[j] * Q[:,j]
+                        somatorio = somatorio + alpha[r] * Q[:,r]
 
-                    #Determine o próximo regressor ortogonal (candidato) eliminando de um regressor original o efeito dos m-1 regressores
+                    #Determine o próximo regressor ortogonal (candidato) eliminando de um regressor original o efeito dos s-1 regressores
                     #ortogonais escolhidos até o presente
-                    q_k.append(candidatos[:, i] - somatorio)
+                    q_s.append(candidatos[:, m] - somatorio)
                     
                     #Calcule o coeficiente do regressor ortogonal determinado no passo anterior
-                    g_k.append(np.dot(q_k[i], output[grau:]) / np.dot(q_k[i], q_k[i]))
+                    g_s.append(np.dot(q_s[m], y[max_delay:]) / np.dot(q_s[m], q_s[m]))
                     
                     #Determine o valor do respectivo ERR 
-                    ERR_k.append(g_k[i] ** 2 * q_k[-1].dot(q_k[i]) / output[grau:].dot(output[grau:]))
+                    ERR_s.append(g_s[m] ** 2 * q_s[-1].dot(q_s[m]) / sigma)
                 else:
-                    ERR_k.append(0)  #Preciso zerar o que eu escolher para completar o número m
-                    q_k.append(candidatos[:, i] * 0)
-                    g_k.append(0)
+                    ERR_s.append(0)  #Preciso zerar o que eu escolher para completar o número s
+                    q_s.append(candidatos[:, m] * 0)
+                    g_s.append(0)
 
 
-            #Escolha para ser o m-ésimo regressor ortogonal aquele regressor, entre os restantes, com maior ERR
-            l.append(np.argmax(ERR_k))
+            #Escolha para ser o s-ésimo regressor ortogonal aquele regressor, entre os restantes, com maior ERR
+            l.append(np.argmax(ERR_s))
 
-            #Esse é o m-ésimo regressor ortogonal regressor ortogonal, que é a m-ésima coluna de Q
-            # Q.append(q_k[l[m]])
-            Q = np.column_stack((Q, q_k[l[m]]))
+            #Esse é o s-ésimo regressor ortogonal regressor ortogonal, que é a s-ésima coluna de Q
+            # Q.append(q_k[l[s]])
+            Q = np.column_stack((Q, q_s[l[s]]))
             
-            #Guarde o g do m-ésimo regressor
-            g_final.append(g_k[l[m]])
+            #Guarde o g do s-ésimo regressor
+            g.append(g_s[l[s]])
 
-            #Guarde o ERR do m-ésimo regressor
-            ERR_total[m] = ERR_k[l[m]]
+            #Guarde o ERR do s-ésimo regressor
+            ERR_total[s] = ERR_s[l[s]]
 
             #Construa a matriz A
-            for r in range(m):
-                a[r,m] = np.dot(Q[:,r], candidatos[:, l[m]]) / np.dot(Q[:,r], Q[:,r])
-            a[m,m] = 1
+            for r in range(s):
+                A[r,s] = np.dot(Q[:,r], candidatos[:, l[s]]) / np.dot(Q[:,r], Q[:,r])
+            A[s,s] = 1
                 
 
             esr = 1 - sum(ERR_total)
             if esr < rho:
-                M_0 = m + 1
+                M_0 = s + 1
                 break
     
   
-    a = a[:M_0,:M_0]
+    A = A[:M_0, :M_0]
     
-    theta = scipy.linalg.solve_triangular(a,g_final,unit_diagonal=True)
+    theta = scipy.linalg.solve_triangular(A, g, unit_diagonal = True)
 
-    return l, ERR_total, theta
+    return l, theta
 
 
