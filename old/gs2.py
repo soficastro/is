@@ -15,6 +15,12 @@ timestamp = np.arange(0, u.shape[0] * 0.1, 0.1)
 u = u/np.max(np.abs(u))
 y = y/np.max(np.abs(y))
 
+        ## Normalizando dados de treino e teste
+        # u_train = u_train/np.max(np.abs(u_train))
+        # y_train = y_train/np.max(np.abs(y_train))
+        # u_test = u_test/np.max(np.abs(u_test))
+        # y_test = y_test/np.max(np.abs(y_test))  
+
 '''
 plt.plot(timestamp, u, label="entrada normalizada")
 plt.plot(timestamp, y, label="saida normalizada")
