@@ -51,10 +51,38 @@ for i = 1:1 % length(expectedFiles)
 
     %% main
 
-    Phi = delay_matrix([1;2;3;4;5], [6;7;8;9;10], 2, 1);
+    Phi = delay_matrix(u, y, 2, 2);
     candidatos = poly_matrix(Phi, 3);
 
-    disp(candidatos);
+    [~, ~, ~, theta_frols, ~, indice] = alg_FROLS(candidatos, y(3:end), 1e-3)
+
+    X = [];
+    for i = indice
+        X = [X candidatos(:, i)];
+    end
+    y_hat = X*theta_frols;
+
+    %% Free Sim
+    N = size(y, 1);
+    y_free = zeros(1, N);
+    y_free(1:3) = y(1:3);
+    for i = 3:N
+        Phi = delay_matrix(u(i-2:i), y_free(i-2:i), 2, 2);
+        Phi = poly_matrix(Phi, 3);
+
+        X = [];
+        for j = indice
+            X = [X Phi(:, j)];
+        end
+
+        disp(X*theta_frols);
+        y_free(i) = X*theta_frols;
+    end
+
+    plot(y, 'b-', 'LineWidth', 1.5); hold on;
+    plot(y_free, 'r--', 'LineWidth', 1.5);
+    legend('y (Real)', 'y\_hat (Estimated)');
+    hold off;
 
 end
 
