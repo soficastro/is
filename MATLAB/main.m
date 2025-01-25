@@ -51,9 +51,10 @@ for i = 1:1 % length(expectedFiles)
 
     %% main
 
-    Phi = delay_matrix([1;2;3;4;5], [6;7;8;9;10], 1, 2);
+    Phi = delay_matrix([1;2;3;4;5], [6;7;8;9;10], 2, 1);
+    candidatos = poly_matrix(Phi, 3);
 
-    disp(Phi);
+    disp(candidatos);
 
 end
 
