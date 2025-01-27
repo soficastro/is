@@ -15,7 +15,7 @@ for filename in os.listdir(data_folder):
     if os.path.isfile(system):
         
         if "ballbeam" in system:
-            continue
+            
             data = pd.read_csv(system, delimiter='\t', header = None)
             system = 'Ball-beam'
             u = data[data.columns[0]].to_numpy()
@@ -26,7 +26,7 @@ for filename in os.listdir(data_folder):
             l = 3 #grau de nao linearidade
 
         elif "dataBenchmark" in system:
-            continue
+            
             data = scipy.io.loadmat(system)
             system = 'Tanks'
             u_train = np.reshape(data['uEst'],1024)

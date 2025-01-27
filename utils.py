@@ -5,12 +5,12 @@ def matriz_candidatos(input, output, nu, ny, l):
     n = len(input)
     max_delay = max(nu, ny)
     linear_psi = np.zeros((n - max_delay, nu + ny))
-
+    
     # Criar a matriz Psi linear com os valores de entrada e saída
     for i in range(ny):
-        linear_psi[:, ny - 1 - i] = output[i:n - max_delay + i]
+        linear_psi[:, i] = output[max_delay - i - 1:n - i - 1]
     for i in range(nu):
-        linear_psi[:, ny + nu - 1 - i] = input[i:n - max_delay + i]
+        linear_psi[:, i + ny] = input[max_delay - i - 1:n - i - 1]
 
     # Gerar combinações de termos até grau l
     array = np.arange(nu + ny)

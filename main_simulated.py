@@ -5,7 +5,7 @@ from utils import matriz_candidatos
 
 print('--')
 
-n_steps = 1000 
+n_steps = 1000
 np.random.seed(0)
 
 nu = 2                  # Atraso da entrada
@@ -31,16 +31,16 @@ for k in range(max_delay, n_steps):
     )
 
 
+
 ### TREINO ###
 
 n_train = int(0.75 * u.shape[0])
 u_train, u_test = u[:n_train], u[n_train:]
 y_train, y_test = y[:n_train], y[n_train:]
 
-rho = 0.0001
-
 candidatos, regressor_names = matriz_candidatos(input = u_train, output = y_train, nu = nu, ny = ny, l = l)
-idx_order, theta = frols(candidatos = candidatos, y = y_train, max_delay = max_delay, rho = rho)
+idx_order, theta = frols(candidatos = candidatos, y = y_train, max_delay = max_delay, rho = 0.001)
+
 
 ### MODELO ###
 
@@ -102,7 +102,7 @@ plt.plot(y_hat[max_delay:], label="Saída simulação livre", color="r")
 plt.plot(y_hat_one_step, label="Saída um passo à frente", color="g", linestyle="--")
 plt.xlabel("Time")
 plt.ylabel("Amplitude")
-plt.title("Ferro de solda")
+plt.title("Soldering Iron")
 plt.legend()
 plt.grid(True)
 plt.show()

@@ -4,14 +4,14 @@ import scipy
 def frols(candidatos, y, max_delay, rho):
     """  
     Entrada:
-        candidatos - matriz (D) com regressores candidatos (p)
-        y - vetor y(t) de saída do sistema
+        candidatos - matriz com regressores candidatos (P) (N - max_delay x M)
+        y - vetor y(t) de saída do sistema (N x 1)
         max_delay - max(nu, ny)
+        rho - limiar
         
     Saída:
         l - índice que indica a ordem encontrada dos regressores
         theta - vetor com thetas escolhidos
-        rho - limiar
     """
 
     N = len(y)                    # Tamanho do vetor y(t)
